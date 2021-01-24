@@ -1,8 +1,14 @@
+//! This application is a simple web server that serves the current working directory.
+//! 
+//! Above all, this application is meant to be simple. Serving the working directory can
+//! be accomplished by using the following command:
+//! ```bash
+//! $ serve-directory
+//! ```
+
 use tokio::signal;
 use tokio::sync::oneshot;
 use warp::{path, Filter};
-
-use std::path::PathBuf;
 
 mod route_utils;
 
@@ -14,20 +20,12 @@ mod route_utils;
 async fn main() {
     println!("Server starting up...");
 
-    // Routes
-    let files = warp::fs::dir("."); // Allow access to all files in the current directory
-    let dirs = warp::get()
-        .and(path::full().map(route_utils::route_to_file_path))
-        .and_then(|path: PathBuf| async move { route_utils::dir_to_http(&path) })
-        .map(|value| warp::reply::html(value));
-    let routes = files.or(dirs);
-
     // Set up trigger to shutdown gracefully
     let (tx, rx) = oneshot::channel::<()>();
 
     // Start Server
     let (_addr, server) =
-        warp::serve(routes).bind_with_graceful_shutdown(([127, 0, 0, 1], 8080), async {
+        warp::serve(routes()).bind_with_graceful_shutdown(([127, 0, 0, 1], 8080), async {
             rx.await.ok();
         });
     tokio::task::spawn(server);
@@ -39,4 +37,17 @@ async fn main() {
     if tx.send(()).is_err() {
         eprintln!("Unable to shut down gracefully!");
     };
+}
+
+/// Provides the Filters specifying the different routes that the server can
+/// respond to
+fn routes() -> warp::filters::BoxedFilter<(impl warp::Reply,)> {
+    let handle_files = warp::fs::dir(".");
+
+    let handle_directories = warp::get()
+        .and(path::full())
+        .and_then(|fp| async move { route_utils::path_to_html(fp) })
+        .map(|value| warp::reply::html(value));
+
+    handle_files.or(handle_directories).boxed()
 }
