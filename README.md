@@ -22,6 +22,9 @@ inspiration for this tool!
 
 This project is made possible by the work of the following great projects:
 * [build_html](https://crates.io/crates/build_html): Joseph Skubal
+* [clap](https://crates.io/crates/clap): Kevin K. and Contributors
+* [env_logger](https://crates.io/crates/env_logger) -- The Rust Project Developers
+* [log](https://crates.io/crates/log) -- The Rust Project Developers
 * [tokio](https://crates.io/crates/tokio): Tokio Contributors
 * [warp](https://crates.io/crates/warp): Sean McArthur
 * [rust-lang](https://rust-lang.org): The Rust Contributors
@@ -31,4 +34,4 @@ This project is licensed under the [MIT license](https://mit-license.org). In ot
 free for you to use for whatever purpose you want. However, to the maximum extent allowed under the 
 law, this software has NO WARRANTY. 
 
-Copyright (C) 2020 Joseph Skubal
+Copyright (C) 2020-21 Joseph Skubal

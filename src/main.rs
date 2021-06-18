@@ -1,42 +1,68 @@
 //! This application is a simple web server that serves the current working directory.
-//! 
+//!
 //! Above all, this application is meant to be simple. Serving the working directory can
 //! be accomplished by using the following command:
 //! ```bash
 //! $ serve-directory
 //! ```
 
+use clap::{App, Arg};
+use log::{error, info, LevelFilter};
 use tokio::signal;
-use tokio::sync::oneshot;
 use warp::{path, Filter};
 
 mod route_utils;
 
 /// Program Entry Point
-///
-/// Starts the server on `127.0.0.1:8080` and waits for the `Ctrl` + `C` shutdown
-/// signal
 #[tokio::main]
 async fn main() {
-    println!("Server starting up...");
+    let matches = App::new("serve-directory")
+        .version("0.1.0")
+        .author("Joseph Skubal")
+        .about("Serves files in the current working directory and subdirectories")
+        .arg(
+            Arg::with_name("port")
+                .short("p")
+                .value_name("PORT")
+                .help("The port to which the server should attempt to bind")
+                .takes_value(true),
+        )
+        .get_matches();
 
-    // Set up trigger to shutdown gracefully
-    let (tx, rx) = oneshot::channel::<()>();
+    initialize_logger();
+    info!("Starting up");
+    let port = matches
+        .value_of("port")
+        .map(|x| x.parse::<u16>())
+        .unwrap_or(Ok(8080));
 
-    // Start Server
-    let (_addr, server) =
-        warp::serve(routes()).bind_with_graceful_shutdown(([127, 0, 0, 1], 8080), async {
-            rx.await.ok();
-        });
-    tokio::task::spawn(server);
-    println!("Now serving on http://localhost:8080/");
+    match port {
+        Ok(port) => start_server(port).await,
+        Err(_) => error!("Invalid port specified")
+    }
+}
 
-    // Send the shutdown signal when Ctrl + C is pressed
-    signal::ctrl_c().await.unwrap();
-    println!("Shutting down gracefully...");
-    if tx.send(()).is_err() {
-        eprintln!("Unable to shut down gracefully!");
+/// Initialize the logger to print output
+fn initialize_logger() {
+    env_logger::builder()
+        .format_module_path(false)
+        .filter_level(LevelFilter::Info)
+        .init()
+}
+
+/// Start the server
+async fn start_server(port: u16) {
+    let shutdown = async {
+        if signal::ctrl_c().await.is_err() {
+            error!("Something went wrong getting Ctrl+C signal")
+        }
     };
+    #[rustfmt::skip]
+    let (addr, server) = warp::serve(routes())
+        .bind_with_graceful_shutdown(([127, 0, 0, 1], port), shutdown);
+
+    info!("Server listening on {}", addr);
+    server.await;
 }
 
 /// Provides the Filters specifying the different routes that the server can
