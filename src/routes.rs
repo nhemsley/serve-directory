@@ -28,11 +28,22 @@ async fn path_to_html(route: warp::path::FullPath) -> Result<String, warp::rejec
         .filter_map(|res| res.ok().map(|x| x.path()))
         .filter_map(format_path)
         .fold(
-            Container::new(ContainerType::UnorderedList).add_link("..", ".."),
-            |a, (path, name)| a.add_link(format!("/{}", path), name),
-        );
+            Container::new(ContainerType::Div).add_link_attr("..", "..", [("class", "content")]),
+            |a, (path, name)| a.add_link_attr(format!("/{}", path), name, [("class", "content")]),
+        )
+        .with_attributes([("id", "wrapper")]);
 
-    Ok(HtmlPage::new().add_container(links).to_html_string())
+    let content = HtmlPage::new()
+        .add_style(include_str!("styles.css"))
+        .add_container(
+            Container::new(ContainerType::Main)
+                .with_attributes([("class", "border-box")])
+                .add_preformatted_attr(route.as_str(), [("id", "header")])
+                .add_container(links),
+        )
+        .to_html_string();
+
+    Ok(content)
 }
 
 /// Converts the provided `PathBuf` into the partial path off of the root, and the filename
