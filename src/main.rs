@@ -1,45 +1,48 @@
-//! This application is a simple web server that serves the current working directory.
-//!
-//! Above all, this application is meant to be simple. Serving the working directory can
-//! be accomplished by using the following command:
-//! ```bash
-//! $ serve-directory
-//! ```
+//! A simple web server to serve a directory of static files
 
-use clap::{App, Arg};
-use log::{error, info, LevelFilter};
+use lazy_static::lazy_static;
+use log::{error, info, warn, LevelFilter};
+use routes::routes;
+use structopt::StructOpt;
 use tokio::signal;
-use warp::{path, Filter};
 
-mod route_utils;
+mod routes;
+
+lazy_static! {
+    /// The command line arguments passed into the program
+    static ref ARGUMENTS: Arguments = {
+        match Arguments::from_args_safe() {
+            Ok(opt) => opt,
+            Err(e) => {
+                error!("{}", e.to_string().trim());
+                warn!("Program shutting down");
+                std::process::exit(1);
+            }
+        }
+    };
+}
+
+#[derive(Debug, StructOpt)]
+#[structopt(
+    author = "Joseph Skubal",
+    about = "Serve files in the specified directory and subdirectories"
+)]
+struct Arguments {
+    /// The port that the server should bind to
+    #[structopt(long, short, default_value = "8080")]
+    pub port: u16,
+
+    /// The root directory that should be served by the
+    #[structopt(default_value = ".")]
+    pub folder: String,
+}
 
 /// Program Entry Point
 #[tokio::main]
 async fn main() {
-    let matches = App::new("serve-directory")
-        .version("0.1.0")
-        .author("Joseph Skubal")
-        .about("Serves files in the current working directory and subdirectories")
-        .arg(
-            Arg::with_name("port")
-                .short("p")
-                .value_name("PORT")
-                .help("The port to which the server should attempt to bind")
-                .takes_value(true),
-        )
-        .get_matches();
-
     initialize_logger();
     info!("Starting up");
-    let port = matches
-        .value_of("port")
-        .map(|x| x.parse::<u16>())
-        .unwrap_or(Ok(8080));
-
-    match port {
-        Ok(port) => start_server(port).await,
-        Err(_) => error!("Invalid port specified")
-    }
+    start_server().await;
 }
 
 /// Initialize the logger to print output
@@ -51,29 +54,17 @@ fn initialize_logger() {
 }
 
 /// Start the server
-async fn start_server(port: u16) {
+async fn start_server() {
     let shutdown = async {
         if signal::ctrl_c().await.is_err() {
-            error!("Something went wrong getting Ctrl+C signal")
+            error!("Something went wrong getting Ctrl+C signal");
+        } else {
+            info!("Ctrl+C signal received. Shutting down");
         }
     };
-    #[rustfmt::skip]
-    let (addr, server) = warp::serve(routes())
-        .bind_with_graceful_shutdown(([127, 0, 0, 1], port), shutdown);
+    let binding = ([127, 0, 0, 1], ARGUMENTS.port);
+    let (addr, server) = warp::serve(routes()).bind_with_graceful_shutdown(binding, shutdown);
 
     info!("Server listening on {}", addr);
     server.await;
-}
-
-/// Provides the Filters specifying the different routes that the server can
-/// respond to
-fn routes() -> warp::filters::BoxedFilter<(impl warp::Reply,)> {
-    let handle_files = warp::fs::dir(".");
-
-    let handle_directories = warp::get()
-        .and(path::full())
-        .and_then(|fp| async move { route_utils::path_to_html(fp) })
-        .map(|value| warp::reply::html(value));
-
-    handle_files.or(handle_directories).boxed()
 }

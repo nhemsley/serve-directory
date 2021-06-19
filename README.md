@@ -22,9 +22,9 @@ inspiration for this tool!
 
 This project is made possible by the work of the following great projects:
 * [build_html](https://crates.io/crates/build_html): Joseph Skubal
-* [clap](https://crates.io/crates/clap): Kevin K. and Contributors
 * [env_logger](https://crates.io/crates/env_logger) -- The Rust Project Developers
 * [log](https://crates.io/crates/log) -- The Rust Project Developers
+* [structopt](https://crates.io/crates/structopt) -- Guillaume Pinot
 * [tokio](https://crates.io/crates/tokio): Tokio Contributors
 * [warp](https://crates.io/crates/warp): Sean McArthur
 * [rust-lang](https://rust-lang.org): The Rust Contributors
