@@ -22,7 +22,7 @@ lazy_static! {
     };
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, StructOpt, Clone, PartialEq)]
 #[structopt(
     author = "Joseph Skubal",
     about = "Serve files in the specified directory and subdirectories"
@@ -42,19 +42,7 @@ struct Arguments {
 async fn main() {
     initialize_logger();
     info!("Starting up");
-    start_server().await;
-}
 
-/// Initialize the logger to print output
-fn initialize_logger() {
-    env_logger::builder()
-        .format_module_path(false)
-        .filter_level(LevelFilter::Info)
-        .init()
-}
-
-/// Start the server
-async fn start_server() {
     let shutdown = async {
         if signal::ctrl_c().await.is_err() {
             error!("Something went wrong getting Ctrl+C signal");
@@ -67,4 +55,12 @@ async fn start_server() {
 
     info!("Server listening on {}", addr);
     server.await;
+}
+
+/// Initialize the logger to print output
+fn initialize_logger() {
+    env_logger::builder()
+        .format_module_path(false)
+        .filter_level(LevelFilter::Info)
+        .init()
 }
