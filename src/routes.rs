@@ -31,7 +31,7 @@ async fn path_to_html(route: FullPath) -> Result<String, warp::reject::Rejection
             Container::new(ContainerType::Main)
                 .with_attributes([("class", "border-box")])
                 .add_preformatted_attr(route.as_str(), [("id", "header")])
-                .add_container(links_container(path.as_path(), &route).ok_or(not_found())?),
+                .add_container(links_container(path.as_path(), &route).ok_or_else(not_found)?),
         )
         .to_html_string();
 
