@@ -4,11 +4,16 @@ version = "0.1.0"
 authors = ["Joseph Skubal"]
 edition = "2018"
 repository = "https://gitlab.com/skubalj/serve-directory"
+description = "Serve a directory with a single command!"
+readme = "README.md"
+license = "MIT"
+categories = ["command-line-utilities"]
+keywords = ["server", "http"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-build_html = { git = "https://gitlab.com/skubalj/build-html" }
+build_html = "2.0.0"
 env_logger = "0.8.4"
 lazy_static = "1.4.0"
 local_ipaddress = "0.1.3"

@@ -1,4 +1,43 @@
-//! A simple web server to serve a directory of static files
+//! `serve-directory` is a simple command line utility to serve static files from the command line. In
+//! the general case, we really mean *simple*. To start a web server serving the contents of the current
+//! directory and its subdirectories, just run the executable without arguments.
+//! 
+//! ```bash
+//! $ serve-directory
+//! ```
+//! 
+//! Files are accessed based on their relative position to the target folder. Consider the following 
+//! (abbreviated) rust project structure:
+//! ```text
+//! Project Structure:          Route:
+//!  .                          /
+//!  ├─ src/                    /src
+//!  │  ├─ main.rs              /src/main.rs
+//!  │  └─ stuff.rs             /src/stuff.rs
+//!  ├─ target/                 /target
+//!  │  └─ debug/               /target/debug
+//!  │     └─ app.exe           /target/debug/app.exe
+//!  └─ README.md               /README.md
+//! ```
+//! 
+//! As you can see, the correlation between the file structure and the route is quite natural.
+//! 
+//! ## Why Should I Care?
+//! Sometimes, configuring network folders is way more work than it's worth to simply pass a couple 
+//! files between machines, especially if you're moving files to or from a headless system. While users
+//! could use a tool like SFTP, `serve-directory` provides a nice graphical way to browse the filesystem
+//! in a web browser that should prove less daunting for new users. It also allows downloading files to 
+//! multiple clients without having to log in through SSH multiple times.
+//! 
+//! It's also easy and doesn't require any additional setup (provided the user has a compiled 
+//! executable). Most users already have a browser on their machine. And, in the event that the user 
+//! does not, they can use `curl` or `wget` to download files over HTTP.
+//! 
+//! While it's evident that there's a use case for a simple and erogonomic HTTP file server, why 
+//! would you use `serve-directory` instead of one of the more established options like the 
+//! [serve](https://www.npmjs.com/package/serve) package for NodeJS? I will concede that in many cases, 
+//! serve will probably suit your needs better. However, because `serve-directory` is written in Rust
+//! and natively compiled, it can be used and distributed in a single executable without a runtime. 
 
 use lazy_static::lazy_static;
 use log::{info, LevelFilter};

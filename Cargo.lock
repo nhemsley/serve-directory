@@ -71,7 +71,8 @@ dependencies = [
 [[package]]
 name = "build_html"
 version = "2.0.0"
-source = "git+https://gitlab.com/skubalj/build-html#f37d30a80c6fc36f1e040fa6d9df1259d5fee467"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e121f1569e70b069135a0768a6b62a16c9c0eeaba92815a4baa6fdb93a97ec79"
 
 [[package]]
 name = "byteorder"
