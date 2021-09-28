@@ -24,10 +24,6 @@ struct Arguments {
     #[structopt(long, short, default_value = "8080")]
     pub port: u16,
 
-    /// The root directory that should be served by the program
-    #[structopt(default_value = ".")]
-    pub folder: String,
-
     /// Whether additional data should be logged to the console
     #[structopt(long, short)]
     pub verbose: bool,
@@ -35,6 +31,10 @@ struct Arguments {
     /// Deploy on localhost, rather than attempting to bind to the external interface
     #[structopt(long, short)]
     pub localhost: bool,
+
+    /// The root directory that should be served by the program
+    #[structopt(default_value = ".")]
+    pub folder: String,
 }
 
 /// Program Entry Point
