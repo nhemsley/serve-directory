@@ -29,7 +29,7 @@ As you can see, the correlation between the file structure and the route is quit
 
 ## Why Should I Care?
 Sometimes, configuring network folders is way more work than it's worth to simply pass a couple 
-files between machines, especially if you're moving files to or from a headless system. While users
+files between machines, especially if you're moving files to or from a headless system. While you
 could use a tool like SFTP, `serve-directory` provides a nice graphical way to browse the filesystem
 in a web browser that should prove less daunting for new users. It also allows downloading files to 
 multiple clients without having to log in through SSH multiple times.
