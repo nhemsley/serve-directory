@@ -2,6 +2,7 @@
 
 use super::ARGUMENTS;
 use build_html::*;
+use log::debug;
 use std::fs::read_dir;
 use std::path::{Path, PathBuf};
 use warp::filters::BoxedFilter;
@@ -12,13 +13,17 @@ use warp::Filter;
 
 /// The set of routes used by the program
 pub fn routes() -> BoxedFilter<(impl Reply,)> {
+    let logging = warp::log::custom(|info| {
+        debug!("Request: '{}',\tStatus: '{}'", info.path(), info.status())
+    });
+
     let handle_files = warp::fs::dir(&ARGUMENTS.folder);
     let handle_directories = warp::get()
         .and(warp::path::full())
         .and_then(path_to_html)
         .map(html);
 
-    handle_files.or(handle_directories).boxed()
+    handle_files.or(handle_directories).with(logging).boxed()
 }
 
 /// Converts the URL route of a folder to an HTML string of the contents
@@ -52,19 +57,28 @@ fn links_container(path: &Path, route: &FullPath) -> Option<Container> {
         links.add_link_attr(parent, "..", content_attrs);
     }
 
-    read_dir(&path)
+    let mut entries: Vec<(String, String, &'static str)> = read_dir(&path)
         .ok()?
         .filter_map(|res| res.ok().map(|x| x.path()))
         .filter_map(format_path)
-        .for_each(|(path, name)| links.add_link_attr(path, name, content_attrs));
+        .collect();
+    entries.sort_by_cached_key(|(_, name, _)| name.to_string());
+    for (path, name, icon) in entries {
+        let link_text = format!("{}<p class=\"text\">{}</p>", icon, name);
+        links.add_link_attr(path, link_text, content_attrs);
+    }
 
     Some(links)
 }
 
 /// Converts the provided `PathBuf` into the partial path off of the root, and the filename
-fn format_path(path: PathBuf) -> Option<(String, String)> {
-    Some((
-        format!("/{}", path.strip_prefix(&ARGUMENTS.folder).ok()?.to_str()?), // Net path
-        path.file_name()?.to_str()?.into(),                                   // File name
-    ))
+fn format_path(path: PathBuf) -> Option<(String, String, &'static str)> {
+    let net_path = format!("/{}", path.strip_prefix(&ARGUMENTS.folder).ok()?.to_str()?);
+    let file_name = path.file_name()?.to_str()?.into();
+    let icon = if path.is_dir() {
+        include_str!("./folder_icon.svg")
+    } else {
+        include_str!("./file_icon.svg")
+    };
+    Some((net_path, file_name, icon))
 }

@@ -1,3 +1,5 @@
+[![pipeline status](https://gitlab.com/skubalj/serve-directory/badges/main/pipeline.svg)](https://gitlab.com/skubalj/serve-directory/-/commits/main)
+
 `serve-directory`
 ===============
 
@@ -75,7 +77,8 @@ $ serve-directory -p 80 ~/www
 
 ## Acknowledgment
 A special thank you to the [serve](https://www.npmjs.com/package/serve) project for providing
-inspiration for this tool!
+inspiration for this tool! Thank you as well to Material-UI for the icons used on the directory 
+webpage!
 
 This project is made possible by the work of the following great libraries:
 | Crate                                                         | Owners                      |
