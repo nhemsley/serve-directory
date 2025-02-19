@@ -1,4 +1,3 @@
-[![pipeline status](https://gitlab.com/skubalj/serve-directory/badges/main/pipeline.svg)](https://gitlab.com/skubalj/serve-directory/-/commits/main)
 
 `serve-directory`
 ===============
