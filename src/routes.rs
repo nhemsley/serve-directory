@@ -11,6 +11,9 @@ use warp::reject::not_found;
 use warp::reply::{html, Reply};
 use warp::Filter;
 
+#[cfg(feature = "markdown")]
+use crate::handlers::markdown::handle_markdown_file;
+
 /// The set of routes used by the program
 pub fn routes() -> BoxedFilter<(impl Reply,)> {
     let logging = warp::log::custom(|info| {
@@ -23,7 +26,18 @@ pub fn routes() -> BoxedFilter<(impl Reply,)> {
         .and_then(path_to_html)
         .map(html);
 
-    handle_files.or(handle_directories).with(logging).boxed()
+    #[cfg(feature = "markdown")]
+    let routes = {
+        let handle_markdown = warp::get()
+            .and(warp::path::full())
+            .and_then(handle_markdown_file);
+        handle_markdown.or(handle_files).or(handle_directories)
+    };
+    
+    #[cfg(not(feature = "markdown"))]
+    let routes = handle_files.or(handle_directories);
+
+    routes.with(logging).boxed()
 }
 
 /// Converts the URL route of a folder to an HTML string of the contents
@@ -82,3 +96,5 @@ fn format_path(path: PathBuf) -> Option<(String, String, &'static str)> {
     };
     Some((net_path, file_name, icon))
 }
+
+

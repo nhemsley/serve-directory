@@ -6,6 +6,14 @@
 //! $ serve-directory
 //! ```
 //!
+//! ## Markdown Support
+//! When built with the `markdown` feature, `serve-directory` can render Markdown files (`.md` and 
+//! `.markdown`) as styled HTML pages instead of serving them as raw text files.
+//!
+//! ```bash
+//! $ cargo build --features markdown
+//! ```
+//!
 //! Files are accessed based on their relative position to the target folder. Consider the following
 //! (abbreviated) rust project structure:
 //! ```text
@@ -38,6 +46,7 @@
 //! [serve](https://www.npmjs.com/package/serve) package for NodeJS? I will concede that in many cases,
 //! serve will probably suit your needs better. However, because `serve-directory` is written in Rust
 //! and natively compiled, it can be used and distributed in a single executable without a runtime.
+//! Additionally, with the optional markdown feature, it can render documentation files nicely.
 
 use lazy_static::lazy_static;
 use log::{info, LevelFilter};
@@ -46,6 +55,7 @@ use std::net::{IpAddr, SocketAddr};
 use structopt::StructOpt;
 use tokio::signal::ctrl_c;
 
+mod handlers;
 mod routes;
 
 lazy_static! {

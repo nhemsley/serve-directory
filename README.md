@@ -50,9 +50,20 @@ The recommended way to install the latest version of this application from
 $ cargo install serve-directory
 ```
 
+To install with markdown rendering support:
+```bash
+$ cargo install serve-directory --features markdown
+```
+
 Alternatively, you can build it from source with cargo, then add the application to your `PATH`.
 ```bash
 $ cargo build --release
+$ cp ./target/release/serve-directory ~/bin/serve-directory
+```
+
+To build with markdown rendering support:
+```bash
+$ cargo build --release --features markdown
 $ cp ./target/release/serve-directory ~/bin/serve-directory
 ```
 
@@ -74,6 +85,24 @@ application binds to, use the `-p` flag. For example, this command will serve co
 $ serve-directory -p 80 ~/www
 ```
 
+## Features
+
+### Markdown Rendering
+When built with the `markdown` feature flag, `serve-directory` can render Markdown files (`.md` and 
+`.markdown` extensions) as styled HTML pages. This feature uses the 
+[markdown-rs](https://github.com/wooorm/markdown-rs) crate for parsing and includes GitHub-style CSS 
+for a pleasant reading experience.
+
+To enable markdown rendering, build or install with the `markdown` feature:
+```bash
+$ cargo build --features markdown
+# or
+$ cargo install serve-directory --features markdown
+```
+
+When accessing a markdown file through the web interface (e.g., `/README.md`), it will be 
+automatically rendered as HTML with proper styling for headers, code blocks, tables, links, and more.
+
 ## Acknowledgment
 A special thank you to the [serve](https://www.npmjs.com/package/serve) project for providing
 inspiration for this tool! Thank you as well to Material-UI for the icons used on the directory 
@@ -90,6 +119,7 @@ This project is made possible by the work of the following great libraries:
 | [structopt](https://crates.io/crates/structopt)               | Guillaume Pinot             |
 | [tokio](https://crates.io/crates/tokio)                       | Tokio Contributors          |
 | [warp](https://crates.io/crates/warp)                         | Sean McArthur               |
+| [markdown](https://crates.io/crates/markdown)                 | Titus Wormer                |
 
 And, of course, the [Rust language](https://rust-lang.org)!
 
