@@ -11,27 +11,25 @@ use warp::reply::{html, Reply};
 /// Handle markdown file rendering
 pub async fn handle_markdown_file(route: FullPath) -> Result<impl Reply, warp::reject::Rejection> {
     let path = PathBuf::from(&ARGUMENTS.folder).join(&route.as_str()[1..]);
-    
+
     // Check if the path exists and is a markdown file
     if !path.exists() || !path.is_file() {
         return Err(not_found());
     }
-    
-    let extension = path.extension()
-        .and_then(|ext| ext.to_str())
-        .unwrap_or("");
-    
+
+    let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
+
     if extension != "md" && extension != "markdown" {
         return Err(not_found());
     }
-    
+
     // Read the markdown file
-    let markdown_content = fs::read_to_string(&path)
-        .map_err(|_| not_found())?;
-    
-    // Convert markdown to HTML
-    let html_content = markdown::to_html(&markdown_content);
-    
+    let markdown_content = fs::read_to_string(&path).map_err(|_| not_found())?;
+
+    // Convert markdown to HTML with GFM features enabled (including tables)
+    let html_content = markdown::to_html_with_options(&markdown_content, &markdown::Options::gfm())
+        .unwrap_or_else(|_| markdown::to_html(&markdown_content));
+
     // Create a styled HTML page
     let page = HtmlPage::new()
         .with_style(include_str!("../styles.css"))
@@ -39,10 +37,10 @@ pub async fn handle_markdown_file(route: FullPath) -> Result<impl Reply, warp::r
         .with_container(
             Container::new(ContainerType::Main)
                 .with_attributes([("class", "border-box markdown-content")])
-                .with_raw(&html_content)
+                .with_raw(&html_content),
         )
         .to_html_string();
-    
+
     Ok(html(page))
 }
 
